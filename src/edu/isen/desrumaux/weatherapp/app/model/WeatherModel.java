@@ -27,17 +27,14 @@ public class WeatherModel extends Observable {
     private float precipitation;
     private String precipitation_mode;
     private Coordinates coordinates;
+    private String weatherConditions;
 
-    @Override
-    public String toString() {
-        return "Météo pour " + city + " (" + city_id + ") : \n" +
-                " Température : " + temperature + " Min : " + temperature_min + " Max : " + temperature_max + "\n" +
-                " Humidité : " + humidity + " %\n" +
-                " Pression atmosphérique : " + pressure + " hPa\n" +
-                " Vent : " + wind_speed + " mps " + wind_direction_name + " " + wind_direction + "\n" +
-                " Couverture : " + clouds_name + " " + clouds + " %\n" +
-                " Visibilité  : " + visibility + " %\n" +
-                " Précipations : " + precipitation_mode + precipitation;
+    public String getWeatherConditions() {
+        return weatherConditions;
+    }
+
+    public void setWeatherConditions(String weatherConditions) {
+        this.weatherConditions = weatherConditions;
     }
 
     public String getCity() {
@@ -174,5 +171,17 @@ public class WeatherModel extends Observable {
 
     public void setCoordinates(Coordinates coordinates) {
         this.coordinates = coordinates;
+    }
+
+    @Override
+    public String toString() {
+        return "Météo pour " + city + " (" + city_id + ") : \n" +
+                " Température : " + temperature + " Min : " + temperature_min + " Max : " + temperature_max + "\n" +
+                " Humidité : " + humidity + " %\n" +
+                " Pression atmosphérique : " + pressure + " hPa\n" +
+                " Vent : " + wind_speed + " mps " + wind_direction_name + " " + wind_direction + "\n" +
+                " Couverture : " + clouds_name + " " + clouds + " %\n" +
+                " Visibilité  : " + visibility + " %\n" +
+                " Précipations : " + precipitation_mode + precipitation;
     }
 }

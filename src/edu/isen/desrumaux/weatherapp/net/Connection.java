@@ -54,14 +54,11 @@ public class Connection {
 
                 LOGGER.debug(element.getTagName());
 
-                if(element.getTagName().equals("current"))
-                {
+                if (element.getTagName().equals("current")) {
                     ArrayList<WeatherModel> result = new ArrayList<WeatherModel>();
                     result.add(convertElementToWeather(element, coordinates));
                     return result;
-                }
-                else
-                {
+                } else {
                     throw new IllegalArgumentException("L'adresse demandée ne correspond pas à une ville");
                 }
             }
@@ -81,8 +78,12 @@ public class Connection {
                 con = (HttpURLConnection) url.openConnection();
             }
             con.setRequestMethod("GET");
+            LOGGER.info("Connection opened");
             int responseCode = con.getResponseCode();
+            LOGGER.info("Response code " + responseCode);
             if (responseCode == HttpURLConnection.HTTP_OK) { // success
+
+                LOGGER.debug("Forecast weather request succeded");
 
                 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
                 DocumentBuilder db = dbf.newDocumentBuilder();
@@ -106,6 +107,7 @@ public class Connection {
 
         if (week != null) {
             int length = week.getLength();
+            LOGGER.debug("Length of the week : " + length);
             for (int i = 0; i < length; i++) {
                 if (week.item(i).getNodeType() == Node.ELEMENT_NODE) {
                     Element el = (Element) week.item(i);
@@ -124,16 +126,19 @@ public class Connection {
                     result.add(forecastWeatherModel);
                 }
             }
+        } else {
+            LOGGER.debug("Week list is null");
         }
         return result;
     }
 
     public WeatherModel convertElementToWeather(Element weatherNode, Coordinates coordinates) {
         WeatherModel weatherModel = new WeatherModel();
-        weatherModel.setCity(weatherNode.getElementsByTagName("city").item(0).getAttributes().getNamedItem("name").getTextContent());
+        weatherModel.setCity(weatherNode.getElementsByTagName("city").item(0).getAttributes().getNamedItem("name").getTextContent() + "," + weatherNode.getElementsByTagName("country").item(0).getTextContent());
         weatherModel.setCity_id(Integer.parseInt(weatherNode.getElementsByTagName("city").item(0).getAttributes().getNamedItem("id").getTextContent()));
 
         weatherModel.setWeather_code(weatherNode.getElementsByTagName("weather").item(0).getAttributes().getNamedItem("icon").getTextContent());
+        weatherModel.setWeatherConditions(weatherNode.getElementsByTagName("weather").item(0).getAttributes().getNamedItem("value").getTextContent());
 
         weatherModel.setTemperature(Float.parseFloat(weatherNode.getElementsByTagName("temperature").item(0).getAttributes().item(3).getTextContent()));
         weatherModel.setTemperature_min(Float.parseFloat(weatherNode.getElementsByTagName("temperature").item(0).getAttributes().item(1).getTextContent()));
@@ -151,8 +156,7 @@ public class Connection {
         weatherModel.setClouds(Float.parseFloat(weatherNode.getElementsByTagName("clouds").item(0).getAttributes().item(1).getTextContent()));
         weatherModel.setClouds_name(weatherNode.getElementsByTagName("clouds").item(0).getAttributes().item(0).getTextContent());
 
-        if(weatherNode.getElementsByTagName("visibility").item(0).getAttributes().getLength() != 0)
-        {
+        if (weatherNode.getElementsByTagName("visibility").item(0).getAttributes().getLength() != 0) {
             weatherModel.setVisibility(Float.parseFloat(weatherNode.getElementsByTagName("visibility").item(0).getAttributes().item(0).getTextContent()));
         }
 

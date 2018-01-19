@@ -12,8 +12,17 @@ import java.util.Observable;
 public class Model extends Observable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Model.class);
 
+    /**
+     * Location coordinates found by google API
+     */
     private Coordinates mySearch;
+    /**
+     * List containing forecast for 5 days
+     */
     private List<ForecastWeatherModel> myWeatherWeek;
+    /**
+     * List containing weather for the current day and history of the requested cities
+     */
     private List<WeatherModel> myWeatherDay;
 
     public Model() {
@@ -51,7 +60,9 @@ public class Model extends Observable {
             if (myWeatherDay.size() != 0)
                 if (mySearch.equals(myWeatherDay.get(0).getCoordinates()))
                     return;
-            // parse current day
+
+            LOGGER.info("Creating first request for weather");
+
             String API_KEY = "89dc391a5578c55ed529ff5a6c2c7c04";
             Connection apiCon = new Connection(
                     "http://api.openweathermap.org/data/2.5/weather?" +
@@ -62,26 +73,37 @@ public class Model extends Observable {
 
             myWeatherDay.add(0, apiCon.getWeather(mySearch).get(0));
 
-            // keep 5 previous search + current
+            // Keep history of 6 elements
             if (myWeatherDay.size() > 6)
                 myWeatherDay.subList(6, myWeatherDay.size()).clear();
 
+            LOGGER.info("Succeded trying to reach day weather");
+
             setChanged();
+            LOGGER.info("Notify observers");
             notifyObservers(1);
+
+            LOGGER.info("Creating second request for forecast");
+
+            String DAILY_API_KEY = "94fa78df6dcce6ddf474b4a4a9b8b838";
 
             Connection forecastApiCon = new Connection(
                     "http://api.openweathermap.org/data/2.5/forecast/daily?" +
                             mySearch +
                             "&lang=fr&units=metric&mode=xml&appid=" +
-                            API_KEY,
+                            DAILY_API_KEY,
                     proxy);
 
             // parse week days
+            LOGGER.info("Parse forecast result");
             myWeatherWeek = forecastApiCon.getForecastWeather(myWeatherDay.get(0));
+            LOGGER.info("Size : " + myWeatherWeek.size());
             setChanged();
+            LOGGER.info("Notify observers");
             notifyObservers(2);
         } else {
             setChanged();
+            LOGGER.info("Place is not registered in google api, be more precise");
             notifyObservers(3);
         }
     }
