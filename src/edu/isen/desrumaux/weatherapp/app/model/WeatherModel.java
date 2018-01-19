@@ -1,8 +1,8 @@
 package edu.isen.desrumaux.weatherapp.app.model;
 
+import edu.isen.desrumaux.weatherapp.app.Coordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
 
 import java.util.Observable;
 
@@ -12,26 +12,27 @@ public class WeatherModel extends Observable {
 
     private String city;
     private int city_id;
-    private int weather_code;
+    private String weather_code;
     private float temperature;
     private float temperature_min;
     private float temperature_max;
-    private float humidty;
-    private int pressure;
+    private float humidity;
+    private float pressure;
     private float wind_speed;
-    private int wind_direction;
+    private float wind_direction;
     private String wind_direction_name;
-    private int clouds;
+    private float clouds;
     private String clouds_name;
-    private int visibility;
-    private int precipitation;
+    private float visibility;
+    private float precipitation;
     private String precipitation_mode;
+    private Coordinates coordinates;
 
     @Override
     public String toString() {
         return "Météo pour " + city + " (" + city_id + ") : \n" +
                 " Température : " + temperature + " Min : " + temperature_min + " Max : " + temperature_max + "\n" +
-                " Humidité : " + humidty + " %\n" +
+                " Humidité : " + humidity + " %\n" +
                 " Pression atmosphérique : " + pressure + " hPa\n" +
                 " Vent : " + wind_speed + " mps " + wind_direction_name + " " + wind_direction + "\n" +
                 " Couverture : " + clouds_name + " " + clouds + " %\n" +
@@ -55,11 +56,11 @@ public class WeatherModel extends Observable {
         this.city_id = city_id;
     }
 
-    public int getWeather_code() {
+    public String getWeather_code() {
         return weather_code;
     }
 
-    public void setWeather_code(int weather_code) {
+    public void setWeather_code(String weather_code) {
         this.weather_code = weather_code;
     }
 
@@ -87,19 +88,19 @@ public class WeatherModel extends Observable {
         this.temperature_max = temperature_max;
     }
 
-    public float getHumidty() {
-        return humidty;
+    public float getHumidity() {
+        return humidity;
     }
 
-    public void setHumidty(float humidty) {
-        this.humidty = humidty;
+    public void setHumidity(float humidity) {
+        this.humidity = humidity;
     }
 
-    public int getPressure() {
+    public float getPressure() {
         return pressure;
     }
 
-    public void setPressure(int pressure) {
+    public void setPressure(float pressure) {
         this.pressure = pressure;
     }
 
@@ -111,11 +112,11 @@ public class WeatherModel extends Observable {
         this.wind_speed = wind_speed;
     }
 
-    public int getWind_direction() {
+    public float getWind_direction() {
         return wind_direction;
     }
 
-    public void setWind_direction(int wind_direction) {
+    public void setWind_direction(float wind_direction) {
         this.wind_direction = wind_direction;
     }
 
@@ -127,11 +128,11 @@ public class WeatherModel extends Observable {
         this.wind_direction_name = wind_direction_name;
     }
 
-    public int getClouds() {
+    public float getClouds() {
         return clouds;
     }
 
-    public void setClouds(int clouds) {
+    public void setClouds(float clouds) {
         this.clouds = clouds;
     }
 
@@ -143,19 +144,19 @@ public class WeatherModel extends Observable {
         this.clouds_name = clouds_name;
     }
 
-    public int getVisibility() {
+    public float getVisibility() {
         return visibility;
     }
 
-    public void setVisibility(int visibility) {
+    public void setVisibility(float visibility) {
         this.visibility = visibility;
     }
 
-    public int getPrecipitation() {
+    public float getPrecipitation() {
         return precipitation;
     }
 
-    public void setPrecipitation(int precipitation) {
+    public void setPrecipitation(float precipitation) {
         this.precipitation = precipitation;
     }
 
@@ -167,36 +168,11 @@ public class WeatherModel extends Observable {
         this.precipitation_mode = precipitation_mode;
     }
 
-    public void convertElementToWeather(Element weatherNode) {
-        this.setCity(weatherNode.getElementsByTagName("city").item(0).getAttributes().getNamedItem("name").getTextContent());
-        this.setCity_id(Integer.parseInt(weatherNode.getElementsByTagName("city").item(0).getAttributes().getNamedItem("id").getTextContent()));
+    public Coordinates getCoordinates() {
+        return coordinates;
+    }
 
-        this.setWeather_code(Integer.parseInt(weatherNode.getElementsByTagName("weather").item(0).getAttributes().getNamedItem("number").getTextContent()));
-
-        this.setTemperature(Float.parseFloat(weatherNode.getElementsByTagName("temperature").item(0).getAttributes().item(3).getTextContent()));
-        this.setTemperature_min(Float.parseFloat(weatherNode.getElementsByTagName("temperature").item(0).getAttributes().item(1).getTextContent()));
-        this.setTemperature_max(Float.parseFloat(weatherNode.getElementsByTagName("temperature").item(0).getAttributes().item(0).getTextContent()));
-
-        this.setHumidty(Float.parseFloat(weatherNode.getElementsByTagName("humidity").item(0).getAttributes().item(1).getTextContent()));
-
-        this.setPressure(Integer.parseInt(weatherNode.getElementsByTagName("pressure").item(0).getAttributes().item(1).getTextContent()));
-
-        this.setWind_direction(Integer.parseInt(weatherNode.getElementsByTagName("direction").item(0).getAttributes().item(2).getTextContent()));
-        this.setWind_direction_name(weatherNode.getElementsByTagName("direction").item(0).getAttributes().item(1).getTextContent());
-        this.setWind_speed(Float.parseFloat(weatherNode.getElementsByTagName("speed").item(0).getAttributes().item(1).getTextContent()));
-
-
-        this.setClouds(Integer.parseInt(weatherNode.getElementsByTagName("clouds").item(0).getAttributes().item(1).getTextContent()));
-        this.setClouds_name(weatherNode.getElementsByTagName("clouds").item(0).getAttributes().item(0).getTextContent());
-
-        this.setVisibility(Integer.parseInt(weatherNode.getElementsByTagName("visibility").item(0).getAttributes().item(0).getTextContent()));
-
-        this.setPrecipitation_mode(weatherNode.getElementsByTagName("precipitation").item(0).getAttributes().getNamedItem("mode").getTextContent());
-        if (!this.getPrecipitation_mode().equals("no")) {
-            this.setPrecipitation(Integer.parseInt(weatherNode.getElementsByTagName("precipitation").item(0).getAttributes().getNamedItem("value").getTextContent()));
-        }
-
-        setChanged();
-        notifyObservers(this);
+    public void setCoordinates(Coordinates coordinates) {
+        this.coordinates = coordinates;
     }
 }

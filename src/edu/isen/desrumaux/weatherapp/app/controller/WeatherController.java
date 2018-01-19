@@ -1,59 +1,80 @@
 package edu.isen.desrumaux.weatherapp.app.controller;
 
-import edu.isen.desrumaux.weatherapp.app.Coordonates;
-import edu.isen.desrumaux.weatherapp.app.IWeatherView;
-import edu.isen.desrumaux.weatherapp.app.model.WeatherModel;
-import edu.isen.desrumaux.weatherapp.app.view.WeatherView;
-import edu.isen.desrumaux.weatherapp.net.Connection;
+import edu.isen.desrumaux.weatherapp.app.model.Model;
+import edu.isen.desrumaux.weatherapp.app.view.MyCardLayout;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
-import java.util.List;
+
+import static edu.isen.desrumaux.weatherapp.Main.*;
 
 public class WeatherController {
 
-    private WeatherModel model = null;
-    private List<IWeatherView> myviews;
+    private Model model = null;
+    private JFrame mainFrame;
+    private MyCardLayout cardLayout;
+    private Container container;
+    private ArrayList<JPanel> myviews;
+    private boolean proxy;
 
     /**
      * Default constructor
      */
-    public WeatherController(WeatherModel model) {
+    public WeatherController(Model model) {
         this.model = model;
-        myviews = new ArrayList<IWeatherView>();
+        mainFrame = new JFrame("Votre météo");
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainFrame.setLocationRelativeTo(null);
+        myviews = new ArrayList<JPanel>();
+        container = mainFrame.getContentPane();
+        cardLayout = new MyCardLayout();
+        container.setLayout(cardLayout);
     }
 
-    public void addView(IWeatherView v) {
+    public void addView(JPanel v, String vName) {
+        this.container.add(v, vName);
         this.myviews.add(v);
     }
 
-    public void displayHomeView() {
-        myviews.get(0).display();
+    public void displayView(String vName) {
+        cardLayout.show(container, vName);
+        mainFrame.pack();
+        mainFrame.setVisible(true);
     }
 
-    public void displayWeatherView() {
-        myviews.get(1).display();
+    public JFrame getMainFrame() {
+        return mainFrame;
     }
 
-    public void closeViews() {
-        for (IWeatherView wv : myviews) {
-            wv.close();
+    public void displayError() {
+        this.displayView(HOMEVIEW);
+    }
+
+    public void displayHome() {
+        displayView(HOMEVIEW);
+    }
+
+    public void notifyWeatherChoice(String city, boolean proxy) {
+        if (city.length() > 2) {
+            Thread getWeather = new Thread(() -> {
+                this.proxy = proxy;
+                this.model.getForecast(city, proxy);
+                displayView(WEATHERVIEW);
+            });
+            getWeather.start();
+            displayView(LOADINGVIEW);
         }
     }
 
-    public void notifyWeatherChoice(String city) {
-
-        String GOOGLE_API_KEY = "AIzaSyBkfoPVii6YLNux8fcYqltqvaaHxulZuBw";
-        Connection googleApiCon = new Connection("https://maps.googleapis.com/maps/api/geocode/xml?address="+ city.replaceAll("\\s","+") + "&key=" + GOOGLE_API_KEY, false);
-        Coordonates coordonates = googleApiCon.getCoordonates();
-
-        String API_KEY = "89dc391a5578c55ed529ff5a6c2c7c04";
-        Connection apiCon = new Connection("http://api.openweathermap.org/data/2.5/weather?" + coordonates +"&lang=fr&units=metric&mode=xml&appid=" + API_KEY, false);
-        apiCon.getWeather(model);
-    }
-
-    public void notifyWeatherDisplay() {
-        closeViews();
-        model.addObserver(new WeatherView(this, model));
-        displayWeatherView();
+    public void notifyRefresh(String city) {
+        if (city.length() > 2) {
+            Thread getWeather = new Thread(() -> {
+                this.model.getForecast(city, this.proxy);
+                this.displayView(WEATHERVIEW);
+            });
+            getWeather.start();
+            displayView(LOADINGVIEW);
+        }
     }
 }
