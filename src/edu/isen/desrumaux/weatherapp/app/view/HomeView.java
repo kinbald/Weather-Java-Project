@@ -30,7 +30,6 @@ public class HomeView extends JPanel implements ActionListener, Observer {
      * Proxy selected
      */
     private boolean proxy = false;
-    private JCheckBox proxyCheck;
 
     public HomeView(WeatherController controller, String vName) {
         LOGGER.info("HomeView created with name:" + vName);
@@ -52,7 +51,7 @@ public class HomeView extends JPanel implements ActionListener, Observer {
         JPanel panel = new JPanel(new FlowLayout());
         panel.add(field);
 
-        proxyCheck = new JCheckBox("Utiliser le proxy isen", proxy);
+        JCheckBox proxyCheck = new JCheckBox("Utiliser le proxy isen", proxy);
         proxyCheck.addActionListener(this);
 
         button = new JButton("Rechercher la météo");
@@ -131,6 +130,16 @@ public class HomeView extends JPanel implements ActionListener, Observer {
                             "Le lieu \"" + e + "\" n'a pas été trouvé\n" +
                                     "Merci de préciser votre recherche.",
                             "Lieu non trouvé",
+                            JOptionPane.ERROR_MESSAGE);
+                    break;
+                case 4:
+                    LOGGER.info("Code means that request is not possible due to connection error");
+                    this.controller.displayError();
+                    LOGGER.info("Display error dialog");
+                    JOptionPane.showMessageDialog(this,
+                            "La requête n'a pas pu aboutir.\n" +
+                                    "Merci de vérifier votre connexion.",
+                            "Requête non aboutie",
                             JOptionPane.ERROR_MESSAGE);
                     break;
             }

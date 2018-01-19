@@ -9,9 +9,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
 
@@ -32,8 +35,7 @@ public class Connection {
         this.useProxy = proxy;
     }
 
-    public ArrayList<WeatherModel> getWeather(Coordinates coordinates) {
-        try {
+    public ArrayList<WeatherModel> getWeather(Coordinates coordinates) throws IOException, SAXException, ParserConfigurationException {
             HttpURLConnection con;
             if (useProxy) {
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("isen.isen.fr", 3128));
@@ -62,14 +64,13 @@ public class Connection {
                     throw new IllegalArgumentException("L'adresse demandée ne correspond pas à une ville");
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+            else
+            {
+                throw new IOException("Problème de connexion durant la requête");
+            }
     }
 
-    public ArrayList<ForecastWeatherModel> getForecastWeather(WeatherModel weatherModel) {
-        try {
+    public ArrayList<ForecastWeatherModel> getForecastWeather(WeatherModel weatherModel) throws IOException, SAXException, ParserConfigurationException {
             HttpURLConnection con;
             if (useProxy) {
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("isen.isen.fr", 3128));
@@ -94,10 +95,10 @@ public class Connection {
 
                 return convertElementToForecastWeather(element, weatherModel);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+            else
+            {
+                throw new IOException("Problème de connexion durant la requête");
+            }
     }
 
     public ArrayList<ForecastWeatherModel> convertElementToForecastWeather(Element weatherNode, WeatherModel weatherModel) {
@@ -168,7 +169,7 @@ public class Connection {
         return weatherModel;
     }
 
-    public Coordinates getCoordinates() throws Exception {
+    public Coordinates getCoordinates() throws IOException, IllegalArgumentException, SAXException, ParserConfigurationException {
 
         HttpURLConnection con;
         if (useProxy) {
@@ -198,7 +199,7 @@ public class Connection {
                 throw new IllegalArgumentException("Le lieu demandé n'existe pas");
             }
         } else {
-            throw new Exception("La reqûete n'a pas pu aboutir");
+            throw new IOException("La reqûete n'a pas pu aboutir");
         }
     }
 }

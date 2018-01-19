@@ -6,13 +6,28 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Observable;
 
+/**
+ * Model that contains weather data from regular info
+ */
 public class WeatherModel extends Observable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WeatherModel.class);
 
+    /**
+     * City namle
+     */
     private String city;
+    /**
+     * City ID
+     */
     private int city_id;
+    /**
+     * Weather string
+     */
     private String weather_code;
+    /**
+     * Current temperature
+     */
     private float temperature;
     private float temperature_min;
     private float temperature_max;
@@ -26,7 +41,13 @@ public class WeatherModel extends Observable {
     private float visibility;
     private float precipitation;
     private String precipitation_mode;
+    /**
+     * Geocoordinates for this place
+     */
     private Coordinates coordinates;
+    /**
+     * Small string to explain weather
+     */
     private String weatherConditions;
 
     public String getWeatherConditions() {

@@ -4,7 +4,10 @@ import edu.isen.desrumaux.weatherapp.app.Coordinates;
 import edu.isen.desrumaux.weatherapp.net.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
@@ -31,7 +34,17 @@ public class Model extends Observable {
         this.myWeatherWeek = new ArrayList<ForecastWeatherModel>();
     }
 
-    public void runSearch(String query, boolean proxy) {
+    /**
+     * Methode that requests to google API lattiude and longitude from an adress
+     *
+     * @param query Address
+     * @param proxy
+     * @throws IOException
+     * @throws IllegalArgumentException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     */
+    private void runSearch(String query, boolean proxy) throws IOException, IllegalArgumentException, ParserConfigurationException, SAXException {
         LOGGER.debug("Request coordinates for \"" + query + "\" | Proxy set to " + proxy);
         String GOOGLE_API_KEY = "AIzaSyBkfoPVii6YLNux8fcYqltqvaaHxulZuBw";
         Connection googleApiCon = new Connection(
@@ -40,26 +53,26 @@ public class Model extends Observable {
                         "&key=" +
                         GOOGLE_API_KEY,
                 proxy);
-        try {
-            mySearch = googleApiCon.getCoordinates();
-        } catch (IllegalArgumentException e) {
-            LOGGER.error(query + "n'existe pas");
-            mySearch = null;
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            mySearch = null;
-        }
+        mySearch = googleApiCon.getCoordinates();
         LOGGER.debug("API found : " + mySearch);
     }
 
+    /**
+     * Method that requests forecast from OpenWeatherMap
+     *
+     * @param query
+     * @param proxy
+     */
     public void getForecast(String query, boolean proxy) {
-
-        runSearch(query, proxy);
-
-        if (mySearch != null) {
+        try {
+            runSearch(query, proxy);
             if (myWeatherDay.size() != 0)
-                if (mySearch.equals(myWeatherDay.get(0).getCoordinates()))
+                if (mySearch.equals(myWeatherDay.get(0).getCoordinates())) {
+                    setChanged();
+                    LOGGER.info("Notify observers");
+                    notifyObservers(2);
                     return;
+                }
 
             LOGGER.info("Creating first request for weather");
 
@@ -101,10 +114,16 @@ public class Model extends Observable {
             setChanged();
             LOGGER.info("Notify observers");
             notifyObservers(2);
-        } else {
+        } catch (IOException e) {
+            setChanged();
+            LOGGER.info("ERROR during request. Please check your connection.");
+            notifyObservers(4);
+        } catch (IllegalArgumentException e) {
             setChanged();
             LOGGER.info("Place is not registered in google api, be more precise");
             notifyObservers(3);
+        } catch (SAXException | ParserConfigurationException e) {
+            LOGGER.info(e.getMessage());
         }
     }
 
