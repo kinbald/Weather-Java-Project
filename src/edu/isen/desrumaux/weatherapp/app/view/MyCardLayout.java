@@ -11,6 +11,7 @@ public class MyCardLayout extends CardLayout {
 
     @Override
     public Dimension preferredLayoutSize(Container parent) {
+        LOGGER.info("Ask for cardlayout resize");
         Component current = findCurrentComponent(parent);
         if (current != null) {
             Insets insets = parent.getInsets();
@@ -22,7 +23,7 @@ public class MyCardLayout extends CardLayout {
         return super.preferredLayoutSize(parent);
     }
 
-    public Component findCurrentComponent(Container parent) {
+    private Component findCurrentComponent(Container parent) {
         for (Component comp : parent.getComponents()) {
             if (comp.isVisible()) {
                 return comp;
